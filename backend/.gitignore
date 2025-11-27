@@ -1,0 +1,34 @@
+# Rust build
+/target
+**/*.rs.bk
+
+# Cargo
+Cargo.lock
+# (If this is a binary backend project, you can commit Cargo.lock — optional)
+# Uncomment the next line if you want to commit Cargo.lock:
+# !Cargo.lock
+
+# Env files
+.env
+.env.local
+.env.development
+.env.production
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Backups
+*.old
+*.bak
+
+# Node leftovers (if someone runs npm accidentally)
+node_modules/
