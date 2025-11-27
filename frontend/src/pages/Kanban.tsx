@@ -161,9 +161,9 @@ const KanbanBoard: React.FC = () => {
   );
 
   const columns: Column[] = [
-    { id: 'todo', title: 'To Do', color: 'bg-purple-800' },
-    { id: 'active', title: 'Active', color: 'bg-blue-400' },
-    { id: 'completed', title: 'Completed', color: 'bg-[#8cb369]' }
+    { id: 'todo', title: 'To Do', color: 'bg-purple-600' },
+    { id: 'active', title: 'Active', color: 'bg-blue-600' },
+    { id: 'completed', title: 'Completed', color: 'bg-emerald-600' }
   ];
 
   useEffect(() => {
@@ -306,23 +306,15 @@ const KanbanBoard: React.FC = () => {
       return;
     }
 
-    const containerId : string = (over.data.current?.sortable.containerId);
-
-    const getId = {
-      'Sortable-0' : 'todo',
-      'Sortable-2' : 'active',
-      'Sortable-4' : 'completed'
-    } as const;
-
-    const id = getId[containerId as keyof typeof getId];
-
     const activeContainer = findContainer(active.id as string);
     let overContainer: ColumnId | undefined;
     
-    if (id === 'todo' || id === 'active' || id === 'completed') {
-      overContainer = id as ColumnId;
+    // Check if dropping directly on a column
+    if (over.id === 'todo' || over.id === 'active' || over.id === 'completed') {
+      overContainer = over.id as ColumnId;
     } else {
-      overContainer = findContainer(id as string);
+      // Dropping on another task
+      overContainer = findContainer(over.id as string);
     }
 
     if (!activeContainer || !overContainer) {
@@ -330,18 +322,21 @@ const KanbanBoard: React.FC = () => {
       return;
     }
 
+    // Update the task's column in the backend
     await kanbanApi.updateTask(active.id as string, { column: overContainer });
 
+    // If within the same container, just reorder
+    if (activeContainer === overContainer) {
       const activeIndex = tasks[activeContainer].findIndex(task => task.taskId === active.id);
       const overIndex = tasks[overContainer].findIndex(task => task.taskId === over.id);
       
-      if (activeIndex !== overIndex && overIndex !== -1) {
+      if (activeIndex !== overIndex) {
         setTasks(prev => ({
           ...prev,
           [overContainer]: arrayMove(prev[overContainer], activeIndex, overIndex),
         }));
       }
-    
+    }
 
     setActiveId(null);
   };
@@ -369,7 +364,7 @@ const KanbanBoard: React.FC = () => {
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="bg-purple-800 text-white px-6 py-3 rounded-lg hover:bg-purple-900 transition-colors flex items-center gap-2 shadow-lg"
+            className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 shadow-lg"
           >
             <Plus size={20} />
             Add Task
@@ -392,10 +387,10 @@ const KanbanBoard: React.FC = () => {
         {showAddModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div 
-              className="absolute inset-0 bg-black/60 "
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
               onClick={() => setShowAddModal(false)}
             />
-            <div className="relative bg-gray-800/10 rounded-xl shadow-2xl p-6 w-full max-w-md border border-gray-700 backdrop-blur-lg">
+            <div className="relative bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-md border border-gray-700">
               <h3 className="text-2xl font-bold text-white mb-4">Add New Task</h3>
               <input
                 type="text"
@@ -403,7 +398,7 @@ const KanbanBoard: React.FC = () => {
                 onChange={(e) => setNewTaskText(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && addTask()}
                 placeholder="Enter task description..."
-                className="w-full px-4 py-3  border-gray-600 rounded-lg  focus:outline-none focus:ring-2 ring-amber-100 focus:ring-purple-800 text-white placeholder-gray-400 mb-4"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-400 mb-4"
                 autoFocus
               />
               <div className="flex gap-3 justify-end">
@@ -418,7 +413,7 @@ const KanbanBoard: React.FC = () => {
                 </button>
                 <button
                   onClick={addTask}
-                  className="bg-purple-800 text-white px-6 py-2 rounded-lg hover:bg-purple-900 transition-colors flex items-center gap-2"
+                  className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
                 >
                   <Plus size={18} />
                   Add Task
